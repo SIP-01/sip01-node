@@ -20,4 +20,6 @@ Python 3.11+ is required because the runtime imports standard-library tomllib. P
 
 The node creates a per-node indexer identity in indexer.key with mode 0600 by default. It does not support SIP01_NSEC_FILE. The external-key environment override is SIP01_NSEC only; inject it from a protected secret source and never place it in command arguments or a committed file.
 
+The static HTTP fetcher validates every DNS A/AAAA answer, pins its libcurl connection to those validated addresses, disables automatic redirects, and validates/pins each redirect hop before connecting. Browser tiers are disabled unless SIP01_SAFE_EGRESS_PROXY is configured with an operator-verified SSRF-enforcing HTTP(S) proxy. That proxy must check every redirect, CONNECT target and browser subresource, while host/container networking blocks direct egress. With stealth=auto and no proxy, only the static tier runs; stealth=always fails closed. A proxy URL alone is not a security attestation.
+
 Run the protocol selftest and dry-run before enabling publishing. Public observations require explicit authorization.
