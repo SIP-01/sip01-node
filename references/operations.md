@@ -34,7 +34,7 @@ ReadWritePaths=/var/lib/sip01
 WantedBy=multi-user.target
 ~~~
 
-When the optional EnvironmentFile is used, it must contain the supported variable SIP01_NSEC. The file should be provisioned securely outside the repository, owned by root and mode 0600. Do not put the key in the unit file itself. The default and preferred setup omits EnvironmentFile so the node creates its own key file.
+When the optional EnvironmentFile is used, it may contain SIP01_NSEC and/or SIP01_SAFE_EGRESS_PROXY. The file should be provisioned securely outside the repository, owned by root and mode 0600. Do not put key or proxy credentials in the unit file itself. The default and preferred setup omits EnvironmentFile so the node creates its own key file. SIP01_SAFE_EGRESS_PROXY must reference a proxy whose egress policy is independently verified; this program cannot certify a proxy merely because its URL is configured.
 
 **Important:** the application reads SIP01_NSEC from the environment. It does not implement SIP01_NSEC_FILE. Do not configure that unsupported name.
 
@@ -66,7 +66,7 @@ Query the node's public indexer pubkey for kind 39697. For indexstr mode, inspec
 |---|---|---|
 | ModuleNotFoundError: tomllib | Python is older than 3.11 | Install/use Python 3.11+ and recreate the virtual environment |
 | ModuleNotFoundError: scrapling | dependencies missing from active environment | activate the node venv and install requirements.txt |
-| Browser tiers unavailable | browser binaries are not installed | install browser dependencies or use stealth=off |
+| Browser tiers unavailable | browser binaries missing or SIP01_SAFE_EGRESS_PROXY absent/invalid | install browser dependencies and configure an operator-verified SSRF-enforcing HTTP(S) proxy; without it, auto uses only HTTP and always refuses |
 | 0/N relays acknowledged | relays unreachable, rejecting or rate-limiting | inspect per-relay logs and outbox retries |
 | Outbox grows | relay acknowledgements are not arriving | verify relay URLs/connectivity and inspect retry state |
 | Crawl paused on bandwidth | hourly bandwidth limit reached | review the configured budget; do not disable without a resource plan |
@@ -75,4 +75,4 @@ Query the node's public indexer pubkey for kind 39697. For indexstr mode, inspec
 
 ## Security posture
 
-The node should have no inbound listener, a dedicated local identity, restrictive key-file permissions, bounded fetch timeouts/concurrency, public-destination SSRF protection including redirects, and explicit user approval before first publication. These controls must be verified on the actual deployed revision; this document is not a runtime attestation.
+The node should have no inbound listener, a dedicated local identity, restrictive key-file permissions, bounded fetch timeouts/concurrency, DNS-pinned public-destination SSRF protection including every redirect hop, and explicit user approval before first publication. If browser tiers are enabled, verify the egress proxy and enforce no-direct-egress at the host/container network layer. These controls must be verified on the actual deployed revision; this document is not a runtime attestation.
